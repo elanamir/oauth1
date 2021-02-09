@@ -54,11 +54,6 @@ func newAuther(config *Config) *auther {
 	}
 }
 
-// XXX
-func NewAuther(config *Config) *auther {
-	return newAuther(config)
-}
-
 // setRequestTokenAuthHeader adds the OAuth1 header for the request token
 // request (temporary credential) according to RFC 5849 2.1.
 func (a *auther) setRequestTokenAuthHeader(req *http.Request) error {
@@ -103,7 +98,7 @@ func (a *auther) setAccessTokenAuthHeader(req *http.Request, requestToken, reque
 
 // setAccessTokenAuthHeader sets the OAuth1 header for the access token request
 // (token credential) according to RFC 5849 2.3.
-func (a *auther) SetEtradeAccessTokenAuthQuery(req *http.Request, requestToken, requestSecret, verifier string) error {
+func (a *auther) setEtradeAccessTokenAuthQuery(req *http.Request, requestToken, requestSecret, verifier string) error {
 	oauthParams := a.commonOAuthParams()
 	oauthParams[oauthTokenParam] = requestToken
 	oauthParams[oauthVerifierParam] = verifier
