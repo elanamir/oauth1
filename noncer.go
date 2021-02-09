@@ -28,7 +28,7 @@ type HexNoncer struct{}
 
 // Nonce provides a random nonce string.
 func (n HexNoncer) Nonce() string {
-	b := make([]byte, 32)
+	b := make([]byte, 20)
 	rand.Read(b)
 	return hex.EncodeToString(b)
 }
