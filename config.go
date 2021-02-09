@@ -184,6 +184,7 @@ func (c *Config) EtradeAccessToken(requestToken, requestSecret, verifier string)
 	if err != nil {
 		return "", "", err
 	}
+	req.Header.Set("Accept", "*/*")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", "", err
