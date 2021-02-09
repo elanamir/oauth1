@@ -112,10 +112,18 @@ func (a *auther) setEtradeAccessTokenAuthQuery(req *http.Request, requestToken, 
 		return err
 	}
 	oauthParams[oauthSignatureParam] = signature
+	
+	keys := make([]string, len(oauthParams))
+	i := 0
+	for key := range oauthParams {
+		keys[i] = key
+		i++
+	}
+	sort.Strings(keys)
 
 	values := url.Values{}
-	for k, v := range oauthParams {
-		values.Add(k, v)
+	for _, key := range keys {
+		values.Add(key, oauthParams[key])
 	}
 
 	req.URL.RawQuery = values.Encode()
