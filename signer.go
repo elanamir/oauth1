@@ -42,6 +42,7 @@ func hmacSign(consumerSecret, tokenSecret, message string, algo func() hash.Hash
 // Sign creates a concatenated consumer and token secret key and calculates
 // the HMAC digest of the message. Returns the base64 encoded digest bytes.
 func (s *HMACSigner) Sign(tokenSecret, message string) (string, error) {
+	fmt.Println(s.ConsumerSecret, tokenSecret, message)
 	return hmacSign(s.ConsumerSecret, tokenSecret, message, sha1.New)
 }
 
