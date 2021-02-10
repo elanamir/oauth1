@@ -109,6 +109,11 @@ func (c *Config) EtradeRequestToken() (requestToken, requestSecret string, err e
 	if err != nil {
 		return "", "", err
 	}
+
+	req.Header.Set("Accept-Encoding", "gzip, deflate")
+	req.Header.Set("Accept", "*/*")
+	req.Header.Set("Connection", "keep-alive")
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", "", err
