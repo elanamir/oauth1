@@ -10,6 +10,7 @@ import (
 	"encoding/base64"
 	"hash"
 	"strings"
+	"fmt"
 )
 
 // A Signer signs messages to create signed OAuth1 Requests.
