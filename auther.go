@@ -76,6 +76,31 @@ func (a *auther) setRequestTokenAuthHeader(req *http.Request) error {
 	return nil
 }
 
+// setRequestTokenAuthHeader adds the OAuth1 header for the request token
+// request (temporary credential) according to RFC 5849 2.1.
+func (a *auther) setEtradeRequestTokenAuthHeader(req *http.Request) error {
+	oauthParams := a.commonOAuthParams()
+	oauthParams[oauthCallbackParam] = a.config.CallbackURL
+	params, err := collectParameters(req, oauthParams)
+	if err != nil {
+		return err
+	}
+	signatureBase := signatureBase(req, params)
+	signature, err := a.signer().Sign("", signatureBase)
+	if err != nil {
+		return err
+	}
+	oauthParams[oauthSignatureParam] = signature
+	if a.config.Realm != "" {
+		oauthParams[realmParam] = a.config.Realm
+	}
+
+	oauthParams["format"] = "json"
+	req.URL.RawQuery = makequery(oauthParams) 
+
+	return nil
+}
+
 // setAccessTokenAuthHeader sets the OAuth1 header for the access token request
 // (token credential) according to RFC 5849 2.3.
 func (a *auther) setAccessTokenAuthHeader(req *http.Request, requestToken, requestSecret, verifier string) error {
@@ -113,9 +138,14 @@ func (a *auther) setEtradeAccessTokenAuthQuery(req *http.Request, requestToken, 
 	}
 	oauthParams[oauthSignatureParam] = signature
 
-	keys := make([]string, len(oauthParams))
+	req.URL.RawQuery = makequery(oauthParams)
+	return nil
+}
+
+func makequery(params map[string]string) string {
+	keys := make([]string, len(params))
 	i := 0
-	for key := range oauthParams {
+	for key := range params {
 		keys[i] = key
 		i++
 	}
@@ -123,11 +153,10 @@ func (a *auther) setEtradeAccessTokenAuthQuery(req *http.Request, requestToken, 
 
 	values := url.Values{}
 	for _, key := range keys {
-		values.Add(key, oauthParams[key])
+		values.Add(key, params[key])
 	}
 
-	req.URL.RawQuery = values.Encode()
-	return nil
+	return values.Encode()
 }
 
 // setRequestAuthHeader sets the OAuth1 header for making authenticated

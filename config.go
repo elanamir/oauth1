@@ -100,6 +100,44 @@ func (c *Config) RequestToken() (requestToken, requestSecret string, err error) 
 	return requestToken, requestSecret, nil
 }
 
+func (c *Config) EtradeRequestToken() (requestToken, requestSecret string, err error) {
+	req, err := http.NewRequest("GET", c.Endpoint.RequestTokenURL, nil)
+	if err != nil {
+		return "", "", err
+	}
+	err = newAuther(c).setEtradeRequestTokenAuthHeader(req)
+	if err != nil {
+		return "", "", err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", "", err
+	}
+	// when err is nil, resp contains a non-nil resp.Body which must be closed
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		return "", "", fmt.Errorf("oauth1: Server returned status %d", resp.StatusCode)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", "", err
+	}
+	// ParseQuery to decode URL-encoded application/x-www-form-urlencoded body
+	values, err := url.ParseQuery(string(body))
+	if err != nil {
+		return "", "", err
+	}
+	requestToken = values.Get(oauthTokenParam)
+	requestSecret = values.Get(oauthTokenSecretParam)
+	if requestToken == "" || requestSecret == "" {
+		return "", "", errors.New("oauth1: Response missing oauth_token or oauth_token_secret")
+	}
+	if values.Get(oauthCallbackConfirmedParam) != "true" {
+		return "", "", errors.New("oauth1: oauth_callback_confirmed was not true")
+	}
+	return requestToken, requestSecret, nil
+}
+
 // AuthorizationURL accepts a request token and returns the *url.URL to the
 // Endpoint's authorization page that asks the user (resource owner) for to
 // authorize the consumer to act on his/her/its behalf.
