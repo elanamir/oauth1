@@ -59,6 +59,7 @@ func newAuther(config *Config) *auther {
 func (a *auther) setRequestTokenAuthHeader(req *http.Request) error {
 	oauthParams := a.commonOAuthParams()
 	oauthParams[oauthCallbackParam] = a.config.CallbackURL
+	oauthParams["format"] = "json"
 	params, err := collectParameters(req, oauthParams)
 	if err != nil {
 		return err
@@ -112,7 +113,7 @@ func (a *auther) setEtradeAccessTokenAuthQuery(req *http.Request, requestToken, 
 		return err
 	}
 	oauthParams[oauthSignatureParam] = signature
-	
+
 	keys := make([]string, len(oauthParams))
 	i := 0
 	for key := range oauthParams {
