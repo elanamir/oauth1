@@ -59,7 +59,6 @@ func newAuther(config *Config) *auther {
 func (a *auther) setRequestTokenAuthHeader(req *http.Request) error {
 	oauthParams := a.commonOAuthParams()
 	oauthParams[oauthCallbackParam] = a.config.CallbackURL
-	oauthParams["format"] = "json"
 	params, err := collectParameters(req, oauthParams)
 	if err != nil {
 		return err
